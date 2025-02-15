@@ -24,7 +24,7 @@ def process_faces(input_folder, output_folder):
         for image_name in files:
             image_path = os.path.join(root, image_name)
             if os.path.isfile(image_path) and image_path.endswith(".png"):
-                print(f"Found image: {image_path}")  # Debugging line
+                print(f"Found image: {image_path}")  
                 relative_path = os.path.relpath(root, input_folder)
                 save_path = os.path.join(output_folder, relative_path)
 
