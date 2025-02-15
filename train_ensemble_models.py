@@ -3,7 +3,6 @@ from torchvision import datasets, transforms, models
 import torch.nn as nn
 import torch.optim as optim
 
-# Define dataset transforms
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
@@ -86,19 +85,3 @@ train_model(efficientnet, "efficientnet_model")
 mobilenet = models.mobilenet_v2(weights=models.MobileNet_V2_Weights.DEFAULT)
 mobilenet.classifier[1] = nn.Linear(mobilenet.classifier[1].in_features, 2)
 train_model(mobilenet, "mobilenet_model")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

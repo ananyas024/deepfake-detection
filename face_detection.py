@@ -1,42 +1,49 @@
+import ffmpeg
 import os
-import cv2
-from mtcnn import MTCNN
 
-detector = MTCNN()
 
-def detect_faces(image_path, output_folder):
-    image = cv2.imread(image_path)
-    
-    results = detector.detect_faces(image)
-    print(f"Processing: {image_path}, Faces Detected: {len(results)}")
+FFMPEG_PATH = "C:\\ffmpeg\\bin\\ffmpeg.exe"
+os.environ["PATH"] += os.pathsep + os.path.dirname(FFMPEG_PATH)
 
-    if len(results) > 0:
-        for i, result in enumerate(results):
-            x, y, width, height = result['box']
-            face = image[y:y + height, x:x + width]
-            face_name = os.path.join(output_folder, f"face_{i}_{os.path.basename(image_path)}")
-            cv2.imwrite(face_name, face)
-            print(f"Saved face: {face_name}")
+def extract_frames(video_path, output_folder, interval=30):
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
 
-def process_faces(input_folder, output_folder):
-    print(f"Processing folder: {input_folder}")
-    for root, _, files in os.walk(input_folder):
-        for image_name in files:
-            image_path = os.path.join(root, image_name)
-            if os.path.isfile(image_path) and image_path.endswith(".png"):
-                print(f"Found image: {image_path}")  
-                relative_path = os.path.relpath(root, input_folder)
-                save_path = os.path.join(output_folder, relative_path)
+    if not os.path.exists(video_path):
+        print(f" Error: Video file '{video_path}' not found!")
+        return
 
-                os.makedirs(save_path, exist_ok=True)
-                detect_faces(image_path, save_path)
+    try:
+        probe = ffmpeg.probe(video_path)
+    except FileNotFoundError:
+        print(" Error: FFmpeg binary not found. Ensure FFmpeg is installed and added to PATH.")
+        return
 
-if __name__ == "__main__":
-    base_input_folder = "extracted_frames"
-    base_output_folder = "faces"
+    video_info = next((stream for stream in probe["streams"] if stream["codec_type"] == "video"), None)
+    if not video_info:
+        print(" Error: No video stream found in file!")
+        return
 
-    for dataset in ["train", "test", "validation"]:
-        for category in ["fake", "real"]:
-            input_path = os.path.join(base_input_folder, dataset, category)
-            output_path = os.path.join(base_output_folder, dataset, category)
-            process_faces(input_path, output_path)
+    total_frames = int(video_info.get("nb_frames", 0))
+    if total_frames == 0:
+        print(" Warning: FFmpeg did not detect frame count! Using duration instead.")
+        duration = float(video_info.get("duration", 0))
+        fps = float(video_info.get("r_frame_rate", "30").split("/")[0])
+        total_frames = int(duration * fps)
+
+    print(f" Processing {video_path} - Total Frames: {total_frames}")
+
+    for frame_number in range(0, total_frames, interval):
+        output_path = os.path.join(output_folder, f"frame_{frame_number}.jpg")
+        print(f" Extracting frame {frame_number}...")
+        try:
+            (
+                ffmpeg
+                .input(video_path, ss=frame_number / 30)  
+                .output(output_path, vframes=1)
+                .run(quiet=True, overwrite_output=True)
+            )
+        except ffmpeg.Error as e:
+            print(f" Warning: Failed to extract frame {frame_number} - {e}")
+
+    print(f" Frames extracted successfully to {output_folder}")
