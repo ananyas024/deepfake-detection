@@ -2,13 +2,16 @@
   text-align: center;
   font-family: 'Poppins', sans-serif;
   background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-  min-height: 100vh;
+  min-height: 100vh; /* Ensure it takes at least the full viewport height */
+  width: 100vw; /* Ensure it takes the full viewport width */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   color: white;
-  padding: 20px;
+  margin: 0; /* Remove default margin */
+  padding: 0; /* Remove default padding */
+  transition: background 0.5s ease, color 0.5s ease;
 }
 
 /* Remove or modify the .App-header styles */
@@ -20,7 +23,18 @@
   backdrop-filter: none; /* Remove blur effect */
   border: none; /* Remove border */
   max-width: none; /* Remove max-width restriction */
-  width: auto; /* Allow full width */
+  width: 100%; /* Allow full width */
+}
+
+.theme-switcher {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  z-index: 1000;
 }
 
 h1 {
@@ -98,5 +112,70 @@ button:hover:not(:disabled) {
   }
   to {
     opacity: 1;
+  }
+}
+
+/* New theme-specific rules */
+.App.light {
+  background: #ffffff;
+  color: #000000;
+}
+
+/* Add these rules to override text colors in light theme */
+.App.light h1,
+.App.light .message,
+.App.light .prediction {
+  color: #000000;
+}
+
+/* New light theme-specific animations for text */
+.App.light .App-header h1,
+.App.light .message,
+.App.light .prediction {
+  animation: fadeInLight 0.75s ease-in-out;
+}
+
+@keyframes fadeInLight {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+}
+
+.App.light .custom-file-upload {
+  border: 2px dashed rgba(0, 0, 0, 0.5); /* dark border */
+  color: rgba(0, 0, 0, 0.8); /* dark text */
+}
+
+.App.light .custom-file-upload:hover {
+  background: rgba(0, 0, 0, 0.05); /* subtle hover effect */
+  border-color: rgba(0, 0, 0, 0.8);
+}
+
+.App.dark {
+  background: #121212;
+  color: #e0e0e0;
+}
+
+/* Optional: add smooth fade-in for header elements in dark theme */
+.App.dark .App-header h1,
+.App.dark .message,
+.App.dark .prediction {
+  animation: fadeInTheme 0.75s ease-in-out;
+}
+
+@keyframes fadeInTheme {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

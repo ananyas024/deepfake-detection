@@ -4,12 +4,28 @@ import "./App.css";
 
 function App() {
   const [file, setFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null); // added for video preview
   const [message, setMessage] = useState("");
   const [prediction, setPrediction] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // New theme state (default to 'light')
+  const [theme, setTheme] = useState('light');
+
+  // Toggle theme between 'light' and 'dark'
+  const toggleTheme = () => {
+    setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+  };
+
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+    const selectedFile = e.target.files[0];
+    setFile(selectedFile);
+    /* Generate preview URL if a file is selected */
+    if (selectedFile) {
+      setPreviewUrl(URL.createObjectURL(selectedFile));
+    } else {
+      setPreviewUrl(null);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -47,7 +63,11 @@ function App() {
   };
 
   return (
-    <div className="App">
+    <div className={`App ${theme}`}>
+      {/* Theme switcher icon */}
+      <button className="theme-switcher" onClick={toggleTheme}>
+        {theme === 'light' ? '🌜' : '🌞'}
+      </button>
       <div className="App-header">
         <h1>Deepfake Video Detector</h1>
         <form onSubmit={handleSubmit}>
@@ -71,6 +91,14 @@ function App() {
           <p className="prediction">
             Prediction: <span>{prediction}</span>
           </p>
+        )}
+        {/* Added video preview in a small space */}
+        {previewUrl && (
+          <video
+            src={previewUrl}
+            controls
+            style={{ width: "200px", marginTop: "20px" }}
+          />
         )}
       </div>
     </div>

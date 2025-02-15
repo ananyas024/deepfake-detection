@@ -32,12 +32,12 @@ def predict_faces(face_folder, model_paths):
 
     # Load trained weights
     try:
-        model.resnet.load_state_dict(torch.load(model_paths["resnet"], map_location=device, weights_only=True))
-        model.efficientnet.load_state_dict(torch.load(model_paths["efficientnet"], map_location=device, weights_only=True))
-        model.mobilenet.load_state_dict(torch.load(model_paths["mobilenet"], map_location=device, weights_only=True))
+        model.resnet.load_state_dict(torch.load(model_paths["resnet"], map_location=device))
+        model.efficientnet.load_state_dict(torch.load(model_paths["efficientnet"], map_location=device))
+        model.mobilenet.load_state_dict(torch.load(model_paths["mobilenet"], map_location=device))
     except FileNotFoundError as e:
         print(f"Error loading model weights: {e}")
-        return " Error loading model weights. Please check logs."
+        return "Error loading model weights. Please check logs."
 
     model.eval()
 
@@ -70,7 +70,7 @@ def predict_faces(face_folder, model_paths):
             with torch.no_grad():
                 output = model(batch_images)
                 batch_predictions = torch.argmax(output, dim=1).cpu().numpy()
-                predictions.extend(batch_predictions)
+                predictions.extend(batch_predictions.tolist())  # Convert numpy array to list
 
     # Majority voting
     fake_count = predictions.count(1)
@@ -80,9 +80,9 @@ def predict_faces(face_folder, model_paths):
     print(f"Fake frames: {fake_count}, Real frames: {real_count}")
     
     if fake_count > real_count:
-        result = " The video is a DEEPFAKE!"
+        result = "The video is a DEEPFAKE!"
     else:
-        result = " The video is REAL."
+        result = "The video is REAL."
     
     return result
 
@@ -93,4 +93,5 @@ if __name__ == "__main__":
         "efficientnet": "backend/efficientnet_model_95.38.pth",
         "mobilenet": "backend/mobilenet_model_92.71.pth"
     }
-    predict_faces(face_folder, model_paths)
+    result = predict_faces(face_folder, model_paths)
+    print(result)
